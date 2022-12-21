@@ -1,10 +1,11 @@
 from functools import lru_cache
 
-from db import get_elastic, get_redis
 from elasticsearch import AsyncElasticsearch
 from fastapi import Depends
-from models import Person
 from redis.asyncio import Redis
+
+from db import get_elastic, get_redis
+from models import Person
 
 from .service import Service
 

@@ -2,6 +2,7 @@ from http import HTTPStatus
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
+
 from models import Persons, _Person
 from services.person import PersonService, get_person_service
 

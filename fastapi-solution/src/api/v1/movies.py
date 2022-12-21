@@ -2,6 +2,7 @@ from http import HTTPStatus
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
+
 from models import MovieFull, Movies
 from services.movie import MovieService, get_movie_service
 

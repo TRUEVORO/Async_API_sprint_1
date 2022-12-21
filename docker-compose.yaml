@@ -1,0 +1,34 @@
+version: '3.9'
+
+services:
+  fastapi_solution:
+    build:
+      context: ./fastapi-solution
+      dockerfile: Dockerfile
+    restart: always
+    env_file:
+      - fastapi-solution/.env
+    ports:
+      - '8000:8000'
+    depends_on:
+      - elasticsearch
+      - redis_1
+
+  elasticsearch:
+    image: elasticsearch:8.6.2
+    ports:
+      - '9200:9200'
+    volumes:
+      - elasticsearch:/usr/share/elasticsearch/data
+
+  redis_1:
+    image: redis:7.0.9
+    restart: always
+    volumes:
+      - redis_1:/data
+    ports:
+      - '6379:6379'
+
+volumes:
+  elasticsearch:
+  redis_1:

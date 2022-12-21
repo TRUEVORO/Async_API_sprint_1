@@ -2,6 +2,7 @@ from http import HTTPStatus
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
+
 from models import Genres, _Genre
 from services.genre import GenreService, get_genre_service
 
