@@ -1,6 +1,22 @@
-from utils import OrjsonMixin, UUIDMixin
+from pydantic import BaseModel
+
+from .mixin import OrjsonMixin, UUIDMixin
 
 
-class Person(UUIDMixin, OrjsonMixin):
+class _Person(UUIDMixin):
+    """Person model."""
+
     full_name: str
-    role: str
+    roles: list[str]
+
+
+class Persons(BaseModel):
+    """Person models."""
+
+    persons: _Person
+
+
+class Person(_Person, OrjsonMixin):
+    """Person model for business logic."""
+
+    pass
