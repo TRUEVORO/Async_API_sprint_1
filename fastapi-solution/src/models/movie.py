@@ -1,8 +1,8 @@
 from pydantic import BaseModel, Field
 
-from .genre import Genre
+from .genre import _Genre
 from .mixin import OrjsonMixin, UUIDMixin
-from .person import Person
+from .person import _Person
 
 
 class _Movie(UUIDMixin):
@@ -15,17 +15,17 @@ class _Movie(UUIDMixin):
 class Movies(BaseModel):
     """Movie models with short description."""
 
-    movies: list[_Movie]
+    movies: list[_Movie] = Field(default_factory=list)
 
 
 class MovieFull(_Movie):
     """Movie model with full description."""
 
     description: str = Field(default_factory=str)
-    genre: list[Genre] = Field(default_factory=list)
-    actors: list[Person] = Field(default_factory=list)
-    writers: list[Person] = Field(default_factory=list)
-    directors: list[Person] = Field(default_factory=list)
+    genre: list[_Genre] = Field(default_factory=list)
+    actors: list[_Person] = Field(default_factory=list)
+    writers: list[_Person] = Field(default_factory=list)
+    directors: list[_Person] = Field(default_factory=list)
 
 
 class Movie(MovieFull, OrjsonMixin):

@@ -1,5 +1,6 @@
 import os
 from logging import config as logging_config
+from pathlib import Path
 
 from pydantic import BaseSettings
 
@@ -10,14 +11,14 @@ logging_config.dictConfig(LOGGING)
 
 PROJECT_NAME = os.getenv('PROJECT_NAME', 'movies')
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = Path(__file__).resolve().parents[2]
 
 
 class Settings(BaseSettings):
     """Settings class to read environment variables."""
 
     class Config:
-        env_file = '../.env'
+        env_file = BASE_DIR / '.env'
         env_file_encoding = 'utf-8'
 
 

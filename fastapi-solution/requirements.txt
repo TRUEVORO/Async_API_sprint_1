@@ -1,8 +1,9 @@
 elasticsearch[async]==8.6.2
-fastapi==0.94.0
+fastapi==0.94.1
 orjson==3.8.7
 pre-commit==3.1.1
 pydantic==1.10.6
+python_dotenv==1.0.0
 redis==4.5.1
 uvicorn==0.21.0
 uvloop==0.17.0
