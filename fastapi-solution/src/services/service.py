@@ -1,7 +1,7 @@
 from uuid import UUID
 
 from core.backoff import backoff
-from elasticsearch import AsyncElasticsearch, NotFoundError
+from elasticsearch import AsyncElasticsearch, NotFoundError, RequestError
 from models import Genre, Movie, Person
 from redis.asyncio import Redis
 
@@ -56,7 +56,7 @@ class Service:
                     ],
                 },
             )
-        except NotFoundError:
+        except (NotFoundError, RequestError):
             return None
         return [self.mapper.model(**doc) for doc in docs['hits']['hits']]
 

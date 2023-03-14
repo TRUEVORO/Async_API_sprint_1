@@ -1,7 +1,7 @@
 import logging
 
 import uvicorn
-from api.v1 import movies_router
+from api.v1 import genres_router, movies_router, persons_router
 from core import LOGGING, PROJECT_NAME, ElasticConfig, RedisConfig
 from db import elastic, redis
 from elasticsearch import AsyncElasticsearch
@@ -21,8 +21,8 @@ app = FastAPI(
 
 @app.on_event('startup')
 async def startup():
-    redis.redis = await Redis(host=RedisConfig.redis_host, port=RedisConfig.redis_port)
-    elastic.es = AsyncElasticsearch(hosts=[f'{ElasticConfig.elastic_host}:{ElasticConfig.elastic_port}'])
+    redis.redis = await Redis(host=RedisConfig().redis_host, port=RedisConfig().redis_port)
+    elastic.es = AsyncElasticsearch(hosts=[f'{ElasticConfig().elastic_host}:{ElasticConfig().elastic_port}'])
 
 
 @app.on_event('shutdown')
@@ -32,6 +32,8 @@ async def shutdown():
 
 
 app.include_router(movies_router)
+app.include_router(genres_router)
+app.include_router(persons_router)
 
 
 if __name__ == '__main__':

@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from .mixin import OrjsonMixin, UUIDMixin
 
@@ -12,10 +12,10 @@ class _Genre(UUIDMixin):
 class Genres(BaseModel):
     """Genre models."""
 
-    genres: _Genre
+    genres: list[_Genre] = Field(default_factory=list)
 
 
-class Genre(UUIDMixin, OrjsonMixin):
+class Genre(_Genre, OrjsonMixin):
     """Genre model for business logic."""
 
     pass

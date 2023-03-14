@@ -24,13 +24,13 @@ class MovieAPIFull(MovieFull):
 
 
 @router.get(
-    '/{movie_id}',
+    '/uuid',
     response_model=MovieAPIFull,
     summary='Search movie',
     description='Search movie by id',
     response_description='Full info of the specific movie',
 )
-async def movie_details(movie_id: UUID, movie_service: MovieService = Depends(get_movie_service)) -> MovieAPIFull:
+async def get_movie(movie_id: UUID, movie_service: MovieService = Depends(get_movie_service)) -> MovieAPIFull:
     movie = await movie_service.get_by_id(movie_id)
     if not movie:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='movie not found')
@@ -44,7 +44,7 @@ async def movie_details(movie_id: UUID, movie_service: MovieService = Depends(ge
     description='Popular movies sorted by rating',
     response_description='Short info of the movies sorted by rating',
 )
-async def movies_main(movie_service: MovieService = Depends(get_movie_service)) -> MoviesAPI:
+async def movies_main_page(movie_service: MovieService = Depends(get_movie_service)) -> MoviesAPI:
     movies = await movie_service.search()
     if not movies:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='movie not found')
@@ -52,13 +52,13 @@ async def movies_main(movie_service: MovieService = Depends(get_movie_service)) 
 
 
 @router.get(
-    '/search/{text}',
+    '/search',
     response_model=MoviesAPI,
     summary='Search movies',
     description='Full-text search of movies',
     response_description='Short info of the movie with similar ones',
 )
-async def movies_details(query: str, movie_service: MovieService = Depends(get_movie_service)) -> MoviesAPI:
+async def search_movies(query: str, movie_service: MovieService = Depends(get_movie_service)) -> MoviesAPI:
     movies = await movie_service.search(query)
     if not movies:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='movie not found')
