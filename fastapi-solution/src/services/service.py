@@ -1,9 +1,10 @@
 from uuid import UUID
 
-from core.backoff import backoff
 from elasticsearch import AsyncElasticsearch, NotFoundError, RequestError
-from models import Genre, Movie, Person
 from redis.asyncio import Redis
+
+from core.backoff import backoff
+from models import Genre, Movie, Person
 
 from .utils import Mapper, is_valid_uuid
 
