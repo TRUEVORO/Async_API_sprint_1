@@ -3,8 +3,8 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from models import Persons, _Person
-from services.person import PersonService, get_person_service
+from models import Persons, _Person  # noqa
+from services import PersonService, get_person_service
 
 router = APIRouter(
     prefix='/api/v1/persons',
@@ -25,30 +25,35 @@ class PersonsAPI(Persons):
 
 
 @router.get(
-    '/uuid',
+    '/<{person_id}:UUID>/',
     response_model=PersonAPI,
     summary='Search person',
     description='Search person by id',
-    response_description='Full info of the specific person',
+    response_description='Full person details',
 )
 async def person_details(person_id: UUID, person_service: PersonService = Depends(get_person_service)) -> PersonAPI:
     person = await person_service.get_by_id(person_id)
     if not person:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='person not found')
-    return PersonAPI(uuid=person.uuid, full_name=person.full_name, movies=person.movies)
+    return PersonAPI(uuid=person.uuid, full_name=person.full_name, films=person.films)
 
 
 @router.get(
     '',
     response_model=PersonsAPI,
     summary='Popular persons',
-    description='Popular persons sorted by rating',
-    response_description='Short info of the persons sorted by full name',
+    description='Popular genres with sorting',
+    response_description='Summary of persons',
 )
-async def persons_main(person_service: PersonService = Depends(get_person_service)) -> PersonsAPI:
-    persons = await person_service.search()
+async def persons_main(
+    sort: str | None = None,
+    page: int = 1,
+    page_size: int = 50,
+    person_service: PersonService = Depends(get_person_service),
+) -> PersonsAPI:
+    persons = await person_service.search(sort_by=sort, page=page, page_size=page_size)
     if not persons:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='person not found')
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='persons not found')
     return PersonsAPI(persons=persons)
 
 
@@ -59,8 +64,14 @@ async def persons_main(person_service: PersonService = Depends(get_person_servic
     description='Full-text search of persons',
     response_description='Short info of the person with similar ones',
 )
-async def persons_details(query: str, person_service: PersonService = Depends(get_person_service)) -> PersonsAPI:
-    persons = await person_service.search(query)
+async def persons_details(
+    query: str | None = None,
+    sort: str | None = None,
+    page: int = 1,
+    page_size: int = 50,
+    person_service: PersonService = Depends(get_person_service),
+) -> PersonsAPI:
+    persons = await person_service.search(query=query, sort_by=sort, page=page, page_size=page_size)
     if not persons:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='person not found')
     return PersonsAPI(persons=persons)

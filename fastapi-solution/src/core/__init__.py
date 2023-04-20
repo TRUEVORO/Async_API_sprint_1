@@ -1,5 +1,11 @@
 from .backoff import backoff
-from .config import PROJECT_NAME, ElasticConfig, RedisConfig
+from .config import Settings
 from .logger import LOGGING
+from .mapper import Mapper
 
-__all__ = ('backoff', 'ElasticConfig', 'RedisConfig', 'PROJECT_NAME', 'LOGGING')
+__all__ = (
+    'backoff',
+    'LOGGING',
+    'Settings',
+    'Mapper',
+)

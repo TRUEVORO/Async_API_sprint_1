@@ -1,29 +1,27 @@
 from functools import lru_cache
 
-from elasticsearch import AsyncElasticsearch
 from fastapi import Depends
-from redis.asyncio import Redis
 
-from db import get_elastic, get_redis
+from client import AsyncElasticsearchClient
+from core import Mapper
+from db import get_elastic
 from models import Movie
 
-from .service import Service
+from .base_service import BaseService
+from .utils import SearchTemplates
 
 
-class MovieService(Service):
-    """Person class for executing business logic."""
+class MovieService(BaseService):
+    """Movie class for executing business logic."""
 
-    def __init__(
-        self,
-        redis: Redis,
-        elastic: AsyncElasticsearch,
-    ):
-        super().__init__(redis, elastic, ('movies', Movie))
+    def __init__(self, client: AsyncElasticsearchClient):
+        """Initialization of movie service."""
+
+        super().__init__(client, Mapper('movies', Movie, SearchTemplates().MOVIE_TEMPLATE))
 
 
 @lru_cache
 def get_movie_service(
-    redis: Redis = Depends(get_redis),
-    elastic: AsyncElasticsearch = Depends(get_elastic),
+    elasticsearch: AsyncElasticsearchClient = Depends(get_elastic),
 ) -> MovieService:
-    return MovieService(redis, elastic)
+    return MovieService(elasticsearch)

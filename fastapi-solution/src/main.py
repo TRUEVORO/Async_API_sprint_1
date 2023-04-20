@@ -4,14 +4,17 @@ import uvicorn
 from elasticsearch import AsyncElasticsearch
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
-from redis.asyncio import Redis
 
 from api.v1 import genres_router, movies_router, persons_router
-from core import LOGGING, PROJECT_NAME, ElasticConfig, RedisConfig
-from db import elastic, redis
+from client import AsyncElasticsearchClient
+from core import LOGGING, Settings
+from db import elasticsearch, redis
+
+settings = Settings()
+
 
 app = FastAPI(
-    title=PROJECT_NAME,
+    title=settings.project_name,
     docs_url='/api/openapi',
     openapi_url='/api/openapi.json',
     default_response_class=ORJSONResponse,
@@ -22,16 +25,13 @@ app = FastAPI(
 
 @app.on_event('startup')
 async def startup():
-    redis.redis = await Redis(host=RedisConfig().redis_host, port=RedisConfig().redis_port)
-    elastic.es = AsyncElasticsearch(
-        hosts=[f'https://{ElasticConfig().elastic_host}:{ElasticConfig().elastic_port}'], verify_certs=False
-    )
+    elasticsearch.elasticsearch = AsyncElasticsearchClient(AsyncElasticsearch(settings.elasticsearch_dsn))
 
 
 @app.on_event('shutdown')
 async def shutdown():
     await redis.redis.close()
-    await elastic.es.close()
+    await elasticsearch.elasticsearch.close()
 
 
 app.include_router(movies_router)

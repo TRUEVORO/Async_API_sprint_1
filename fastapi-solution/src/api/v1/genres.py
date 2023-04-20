@@ -3,8 +3,8 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from models import Genres, _Genre
-from services.genre import GenreService, get_genre_service
+from models import Genres, _Genre  # noqa
+from services import GenreService, get_genre_service
 
 router = APIRouter(
     prefix='/api/v1/genres',
@@ -25,11 +25,11 @@ class GenresAPI(Genres):
 
 
 @router.get(
-    '/uuid',
+    '/<{genre_id}:UUID>/',
     response_model=GenreAPI,
     summary='Search genre',
     description='Search genre by id',
-    response_description='Full info of the specific genre',
+    response_description='Full genre details',
 )
 async def genre_details(genre_id: UUID, genre_service: GenreService = Depends(get_genre_service)) -> GenreAPI:
     genre = await genre_service.get_by_id(genre_id)
@@ -42,13 +42,18 @@ async def genre_details(genre_id: UUID, genre_service: GenreService = Depends(ge
     '',
     response_model=GenresAPI,
     summary='Genres',
-    description='Genres',
-    response_description='Genres sorted by names',
+    description='Genres with sorting',
+    response_description='Summary of genres',
 )
-async def genres_main(genre_service: GenreService = Depends(get_genre_service)) -> GenresAPI:
-    genres = await genre_service.search()
+async def genres_main(
+    sort: str | None = None,
+    page: int = 1,
+    page_size: int = 50,
+    genre_service: GenreService = Depends(get_genre_service),
+) -> GenresAPI:
+    genres = await genre_service.search(sort_by=sort, page=page, page_size=page_size)
     if not genres:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='genre not found')
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='genres not found')
     return GenresAPI(genres=genres)
 
 
@@ -56,11 +61,17 @@ async def genres_main(genre_service: GenreService = Depends(get_genre_service)) 
     '/search',
     response_model=GenresAPI,
     summary='Search genres',
-    description='Full-text search of genres',
-    response_description='Short info of the genre with similar ones',
+    description='Full-text search of genres with sorting',
+    response_description='Summary of genres',
 )
-async def genres_details(query: str, genre_service: GenreService = Depends(get_genre_service)) -> GenresAPI:
-    genres = await genre_service.search(query)
+async def genres_details(
+    query: str | None = None,
+    sort: str | None = None,
+    page: int = 1,
+    page_size: int = 50,
+    genre_service: GenreService = Depends(get_genre_service),
+) -> GenresAPI:
+    genres = await genre_service.search(query, sort_by=sort, page=page, page_size=page_size)
     if not genres:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='genre not found')
     return GenresAPI(genres=genres)

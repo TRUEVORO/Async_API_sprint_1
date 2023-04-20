@@ -1,7 +1,9 @@
 from redis.asyncio import Redis
 
-redis: Redis | None = None
+from client import AsyncRedisClient
+from core import Settings
+from storage import AsyncRedisStorage
 
-
-async def get_redis() -> Redis:
-    return redis
+redis_dsn = Settings().redis_fastapi_dsn
+redis = AsyncRedisClient(Redis(host=redis_dsn.host, port=int(redis_dsn.port), db=redis_dsn.path[1:]))
+storage = AsyncRedisStorage(redis)
