@@ -1,34 +1,64 @@
 version: '3.9'
 
 services:
-  fastapi_solution:
+  fastapi-solution:
+    container_name: ${PROJECT_NAME}-app
     build:
       context: ./fastapi-solution
       dockerfile: Dockerfile
     restart: always
     env_file:
-      - fastapi-solution/.env
+      - .env
     ports:
-      - '8000:8000'
+      - ${APP_PORT}:${APP_PORT}
     depends_on:
       - elasticsearch
-      - redis_1
+      - redis
+
+  etl:
+    container_name: ${PROJECT_NAME}-etl
+    build:
+      context: ./postgres_to_es
+      dockerfile: Dockerfile
+    restart: always
+    env_file:
+      - .env
+    networks:
+      custom_network:
+    depends_on:
+      - elasticsearch
+      - redis
 
   elasticsearch:
-    image: elasticsearch:8.6.2
-    ports:
-      - '9200:9200'
-    volumes:
-      - elasticsearch:/usr/share/elasticsearch/data
-
-  redis_1:
-    image: redis:7.0.9
+    container_name: ${PROJECT_NAME}-elasticsearch
+    image: elasticsearch:8.7.0
     restart: always
     volumes:
-      - redis_1:/data
+      - elasticsearch:/usr/share/elasticsearch/data
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms2048m -Xmx2048m
+    networks:
+      custom_network:
     ports:
-      - '6379:6379'
+      - ${ELASTICSEARCH_PORT}:${ELASTICSEARCH_PORT}
+
+  redis:
+    container_name: ${PROJECT_NAME}-redis
+    image: redis:7.0.10-alpine
+    restart: always
+    volumes:
+      - redis:/data
+    networks:
+      custom_network:
+    ports:
+      - ${REDIS_PORT}:${REDIS_PORT}
 
 volumes:
   elasticsearch:
-  redis_1:
+  redis:
+
+networks:
+  custom_network:
+    external: True

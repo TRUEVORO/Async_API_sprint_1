@@ -19,12 +19,16 @@ ARG USER=web
 
 WORKDIR ${APP}
 
-RUN groupadd -r ${USER} \
+RUN apt update \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd -r ${USER} \
     && useradd -d ${APP} -r -g ${USER} ${USER}
 
 COPY --chown=${USER}:${USER} --from=build ${APP}/venv ./venv
 COPY --chown=${USER}:${USER} . .
 
+RUN chmod +x ${APP}/entrypoint.sh
+
 USER ${USER}
 
-CMD ["python",  "src/main.py"]
+ENTRYPOINT ["/opt/fastapi_solution/entrypoint.sh"]

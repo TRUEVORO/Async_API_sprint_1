@@ -6,7 +6,7 @@ from .mixin import OrjsonMixin, UUIDMixin
 class _Genre(UUIDMixin):
     """Genre model."""
 
-    name: str
+    name: str = Field(default_factory=str)
 
 
 class Genres(BaseModel):

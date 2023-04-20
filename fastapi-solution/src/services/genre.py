@@ -1,29 +1,27 @@
 from functools import lru_cache
 
-from elasticsearch import AsyncElasticsearch
 from fastapi import Depends
-from redis.asyncio import Redis
 
-from db import get_elastic, get_redis
+from client import AsyncElasticsearchClient
+from core import Mapper
+from db import get_elastic
 from models import Genre
 
-from .service import Service
+from .base_service import BaseService
+from .utils import SearchTemplates
 
 
-class GenreService(Service):
+class GenreService(BaseService):
     """Genre class for executing business logic."""
 
-    def __init__(
-        self,
-        redis: Redis,
-        elastic: AsyncElasticsearch,
-    ):
-        super().__init__(redis, elastic, ('genres', Genre))
+    def __init__(self, client: AsyncElasticsearchClient):
+        """Initialization of genre service."""
+
+        super().__init__(client, Mapper('genres', Genre, SearchTemplates().GENRE_TEMPLATE))
 
 
 @lru_cache
 def get_genre_service(
-    redis: Redis = Depends(get_redis),
-    elastic: AsyncElasticsearch = Depends(get_elastic),
+    elasticsearch: AsyncElasticsearchClient = Depends(get_elastic),
 ) -> GenreService:
-    return GenreService(redis, elastic)
+    return GenreService(elasticsearch)

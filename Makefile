@@ -5,10 +5,13 @@ help: ## - Получить информацию о командах
 		-e 's/^\(.\+\):\(.*\)/$(shell tput setaf 6)\1$(shell tput sgr0):\2/' \
 		$(MAKEFILE_LIST) | column -c2 -t -s :
 
+network: ## - Создать общую сеть для сервисов
+	docker network create custom_network
+
 run: ## - Запустить docker-compose
 	docker-compose -f docker-compose.yaml up --build -d
 
-down: ## - Уронить docker-compose
+stop: ## - Уронить docker-compose
 	docker-compose -f docker-compose.yaml down
 
 clean: ## - Очистить docker

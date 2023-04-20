@@ -3,8 +3,8 @@ from pydantic import BaseModel, Field
 from .mixin import OrjsonMixin, UUIDMixin
 
 
-class _Movies(UUIDMixin):
-    """Movie model with persona roles."""
+class _Films(UUIDMixin):
+    """Films model with person's roles."""
 
     roles: list[str] = Field(default_factory=list)
 
@@ -12,8 +12,8 @@ class _Movies(UUIDMixin):
 class _Person(UUIDMixin):
     """Person model."""
 
-    full_name: str
-    movies: list[_Movies] = Field(default_factory=list)
+    full_name: str = Field(default_factory=str)
+    films: list[_Films] = Field(default_factory=list)
 
 
 class Persons(BaseModel):

@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 
 
 class UUIDMixin(BaseModel):
-    """Миксин модель uuid."""
+    """Mixin uuid model."""
 
     uuid: UUID = Field(default_factory=uuid4)
 
@@ -15,7 +15,7 @@ def orjson_dumps(v, *, default):
 
 
 class OrjsonMixin(BaseModel):
-    """Модель для быстрой работы с json."""
+    """Model for fast json handling."""
 
     class Config:
         json_loads = orjson.loads

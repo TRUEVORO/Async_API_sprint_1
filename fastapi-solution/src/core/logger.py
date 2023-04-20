@@ -7,7 +7,7 @@ LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
-        'verbose': {'format': LOG_FORMAT},
+        'verbose': {'format': LOG_FORMAT, 'datefmt': '%d-%m-%Y %H:%M:%S'},
         'default': {
             '()': 'uvicorn.logging.DefaultFormatter',
             'fmt': '%(levelprefix)s %(message)s',
