@@ -11,6 +11,8 @@ services:
       - .env
     ports:
       - ${APP_PORT}:${APP_PORT}
+    networks:
+      custom_network:
     depends_on:
       - elasticsearch
       - redis

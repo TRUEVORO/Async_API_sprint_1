@@ -1,4 +1,4 @@
-FROM python:3.11.2-slim-buster as build
+FROM python:3.11.3-slim-buster as build
 
 WORKDIR /opt/postgres_to_es
 
@@ -10,7 +10,7 @@ RUN apt update \
     && venv/bin/pip install --no-cache-dir --upgrade pip \
     && venv/bin/pip install --no-cache-dir -r requirements.txt
 
-FROM python:3.11.2-slim-buster
+FROM python:3.11.3-slim-buster
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \

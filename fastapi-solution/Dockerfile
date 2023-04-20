@@ -1,14 +1,15 @@
-FROM python:3.11.2-buster as build
+FROM python:3.11.3-slim-buster as build
 
 WORKDIR /opt/fastapi_solution
 
 COPY ./requirements.txt .
 
-RUN python -m venv venv \
+RUN apt update \
+    && python -m venv venv \
     && venv/bin/pip install --no-cache-dir --upgrade pip \
     && venv/bin/pip install --no-cache-dir -r requirements.txt
 
-FROM python:3.11.2-buster
+FROM python:3.11.3-slim-buster
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -20,6 +21,7 @@ ARG USER=web
 WORKDIR ${APP}
 
 RUN apt update \
+     && apt install -y --no-install-recommends curl \
     && rm -rf /var/lib/apt/lists/* \
     && groupadd -r ${USER} \
     && useradd -d ${APP} -r -g ${USER} ${USER}
