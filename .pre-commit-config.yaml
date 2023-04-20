@@ -27,12 +27,13 @@ repos:
       - id: isort
         args: [
           --line-length=120,
-          --src=fastapi-solution/src
+          --src=fastapi-solution/src,
+          --src=postgres_to_es/src
         ]
 
   # black
   - repo: https://github.com/psf/black
-    rev: 23.1.0
+    rev: 23.3.0
     hooks:
       - id: black
         args: [
