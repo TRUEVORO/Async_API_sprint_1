@@ -1,7 +1,13 @@
+import logging
 import pickle
 from functools import wraps
+from logging import config as logging_config
 
-from storage import AsyncBaseStorage
+from core import LOGGING
+from storage import AsyncBaseStorage, StorageConnectionError
+
+logger = logging.getLogger(__name__)
+logging_config.dictConfig(LOGGING)
 
 
 def cache(storage: AsyncBaseStorage, cache_lifetime: int = 300):
@@ -19,11 +25,18 @@ def cache(storage: AsyncBaseStorage, cache_lifetime: int = 300):
         async def inner(*args, **kwargs):
             key = '{0}_{1}_{2}'.format(func.__name__, args, kwargs)
 
-            if data := await storage.retrieve_data(key):
-                return pickle.loads(data)
+            try:
+                if data := await storage.retrieve_data(key):
+                    return pickle.loads(data)
+            except StorageConnectionError:
+                logger.exception('Cache storage connection error, cannot retrieve data from storage')
 
             if data := await func(*args, **kwargs):
-                await storage.save_data(key, pickle.dumps(data), cache_lifetime)
+                try:
+                    await storage.save_data(key, pickle.dumps(data), cache_lifetime)
+                except StorageConnectionError:
+                    logger.exception('Cache storage connection error, cannot save data to storage')
+
                 return data
 
         return inner

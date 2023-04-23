@@ -6,4 +6,7 @@ until curl -s "${ELASTICSEARCH_DSN}/_cat/health?h=status" | grep -E -q "(yellow|
 done
 
 echo "Elasticsearch started."
-python src/main.py
+
+cd src || exit
+
+gunicorn -c gunicorn/gunicorn.py main:app

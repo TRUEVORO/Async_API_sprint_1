@@ -1,7 +1,7 @@
-from http import HTTPStatus
+from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from models import Persons, _Person  # noqa
 from services import PersonService, get_person_service
@@ -31,10 +31,10 @@ class PersonsAPI(Persons):
     description='Search person by id',
     response_description='Full person details',
 )
-async def person_details(person_id: UUID, person_service: PersonService = Depends(get_person_service)) -> PersonAPI:
+async def person_details(
+    person_id: UUID, person_service: PersonService = Depends(get_person_service)
+) -> PersonAPI | HTTPException:
     person = await person_service.get_by_id(person_id)
-    if not person:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='person not found')
     return PersonAPI(uuid=person.uuid, full_name=person.full_name, films=person.films)
 
 
@@ -47,13 +47,11 @@ async def person_details(person_id: UUID, person_service: PersonService = Depend
 )
 async def persons_main(
     sort: str | None = None,
-    page: int = 1,
-    page_size: int = 50,
+    page: Annotated[int | None, Query(title='page number', description='optional parameter - page number', ge=1)] = 1,
+    page_size: Annotated[int | None, Query(title='page size', description='optional parameter - page size', ge=1)] = 50,
     person_service: PersonService = Depends(get_person_service),
-) -> PersonsAPI:
+) -> PersonsAPI | HTTPException:
     persons = await person_service.search(sort_by=sort, page=page, page_size=page_size)
-    if not persons:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='persons not found')
     return PersonsAPI(persons=persons)
 
 
@@ -67,11 +65,9 @@ async def persons_main(
 async def persons_details(
     query: str | None = None,
     sort: str | None = None,
-    page: int = 1,
-    page_size: int = 50,
+    page: Annotated[int | None, Query(title='page number', description='optional parameter - page number', ge=1)] = 1,
+    page_size: Annotated[int | None, Query(title='page size', description='optional parameter - page size', ge=1)] = 50,
     person_service: PersonService = Depends(get_person_service),
-) -> PersonsAPI:
+) -> PersonsAPI | HTTPException:
     persons = await person_service.search(query=query, sort_by=sort, page=page, page_size=page_size)
-    if not persons:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='person not found')
     return PersonsAPI(persons=persons)

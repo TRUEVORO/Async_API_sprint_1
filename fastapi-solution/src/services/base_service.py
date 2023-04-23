@@ -1,10 +1,8 @@
 from abc import ABC
 from uuid import UUID
 
-from elasticsearch import ConnectionError
-
 from client import AsyncElasticsearchClient
-from core import Mapper, backoff
+from core import Mapper, status
 from db import redis
 from models import Genre, Movie, Person
 
@@ -21,15 +19,15 @@ class BaseService(ABC):
         self.mapper = mapper
         self.search_creator = SearchBodyCreator(self.mapper.search_body)
 
-    @backoff(ConnectionError)
     @cache(redis.storage)
+    @status()
     async def get_by_id(self, uuid: UUID) -> Genre | Movie | Person | None:
         """Get movie by id from Elasticsearch."""
 
         return await self.client.get_by_id(uuid, self.mapper)
 
-    @backoff(ConnectionError)
     @cache(redis.storage)
+    @status()
     async def search(
         self,
         query: str | None = None,

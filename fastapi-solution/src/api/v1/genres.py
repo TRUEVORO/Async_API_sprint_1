@@ -1,7 +1,7 @@
-from http import HTTPStatus
+from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from models import Genres, _Genre  # noqa
 from services import GenreService, get_genre_service
@@ -31,10 +31,10 @@ class GenresAPI(Genres):
     description='Search genre by id',
     response_description='Full genre details',
 )
-async def genre_details(genre_id: UUID, genre_service: GenreService = Depends(get_genre_service)) -> GenreAPI:
+async def genre_details(
+    genre_id: UUID, genre_service: GenreService = Depends(get_genre_service)
+) -> GenreAPI | HTTPException:
     genre = await genre_service.get_by_id(genre_id)
-    if not genre:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='genre not found')
     return GenreAPI(uuid=genre.uuid, name=genre.name)
 
 
@@ -47,13 +47,11 @@ async def genre_details(genre_id: UUID, genre_service: GenreService = Depends(ge
 )
 async def genres_main(
     sort: str | None = None,
-    page: int = 1,
-    page_size: int = 50,
+    page: Annotated[int | None, Query(title='page number', description='optional parameter - page number', ge=1)] = 1,
+    page_size: Annotated[int | None, Query(title='page size', description='optional parameter - page size', ge=1)] = 50,
     genre_service: GenreService = Depends(get_genre_service),
-) -> GenresAPI:
+) -> GenresAPI | HTTPException:
     genres = await genre_service.search(sort_by=sort, page=page, page_size=page_size)
-    if not genres:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='genres not found')
     return GenresAPI(genres=genres)
 
 
@@ -67,11 +65,9 @@ async def genres_main(
 async def genres_details(
     query: str | None = None,
     sort: str | None = None,
-    page: int = 1,
-    page_size: int = 50,
+    page: Annotated[int | None, Query(title='page number', description='optional parameter - page number', ge=1)] = 1,
+    page_size: Annotated[int | None, Query(title='page size', description='optional parameter - page size', ge=1)] = 50,
     genre_service: GenreService = Depends(get_genre_service),
-) -> GenresAPI:
+) -> GenresAPI | HTTPException:
     genres = await genre_service.search(query, sort_by=sort, page=page, page_size=page_size)
-    if not genres:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='genre not found')
     return GenresAPI(genres=genres)
