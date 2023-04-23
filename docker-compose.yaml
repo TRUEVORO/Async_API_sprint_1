@@ -43,8 +43,8 @@ services:
       - ES_JAVA_OPTS=-Xms2048m -Xmx2048m
     networks:
       custom_network:
-    ports:
-      - ${ELASTICSEARCH_PORT}:${ELASTICSEARCH_PORT}
+    expose:
+      - ${ELASTICSEARCH_PORT}
 
   redis:
     container_name: ${PROJECT_NAME}-redis
@@ -54,8 +54,8 @@ services:
       - redis:/data
     networks:
       custom_network:
-    ports:
-      - ${REDIS_PORT}:${REDIS_PORT}
+    expose:
+      - ${REDIS_PORT}
 
 volumes:
   elasticsearch:

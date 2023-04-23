@@ -1,7 +1,7 @@
-from http import HTTPStatus
+from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from models import MovieFull, Movies
 from services import MovieService, get_movie_service
@@ -31,10 +31,10 @@ class MovieAPIFull(MovieFull):
     description='Search movie by id',
     response_description='Full film details',
 )
-async def get_movie(movie_id: UUID, movie_service: MovieService = Depends(get_movie_service)) -> MovieAPIFull:
+async def get_movie(
+    movie_id: UUID, movie_service: MovieService = Depends(get_movie_service)
+) -> MovieAPIFull | HTTPException:
     movie = await movie_service.get_by_id(uuid=movie_id)
-    if not movie:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='movie not found')
     return MovieAPIFull(**movie.dict())
 
 
@@ -48,15 +48,13 @@ async def get_movie(movie_id: UUID, movie_service: MovieService = Depends(get_mo
 async def movies_main_page(
     sort: str | None = None,
     genre: str | None = None,
-    page: int = 1,
-    page_size: int = 50,
+    page: Annotated[int | None, Query(title='page number', description='optional parameter - page number', ge=1)] = 1,
+    page_size: Annotated[int | None, Query(title='page size', description='optional parameter - page size', ge=1)] = 50,
     movie_service: MovieService = Depends(get_movie_service),
-) -> MoviesAPI:
+) -> MoviesAPI | HTTPException:
     movies = await movie_service.search(
         sort_by=sort, filter_by=('genres', genre) if genre else None, page=page, page_size=page_size
     )
-    if not movies:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='movie not found')
     return MoviesAPI(movies=movies)
 
 
@@ -71,13 +69,11 @@ async def search_movies(
     query: str | None = None,
     sort: str | None = None,
     genre: str | None = None,
-    page: int = 1,
-    page_size: int = 50,
+    page: Annotated[int | None, Query(title='page number', description='optional parameter - page number', ge=1)] = 1,
+    page_size: Annotated[int | None, Query(title='page size', description='optional parameter - page size', ge=1)] = 50,
     movie_service: MovieService = Depends(get_movie_service),
-) -> MoviesAPI:
+) -> MoviesAPI | HTTPException:
     movies = await movie_service.search(
         query=query, sort_by=sort, filter_by=('genre', genre) if genre else None, page=page, page_size=page_size
     )
-    if not movies:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='movie not found')
     return MoviesAPI(movies=movies)

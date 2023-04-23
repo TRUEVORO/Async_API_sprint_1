@@ -1,8 +1,8 @@
 from uuid import UUID
 
-from elasticsearch import ConnectionError, NotFoundError
+from elasticsearch import NotFoundError
 
-from core import Mapper, backoff
+from core import Mapper
 from models import Genre, Movie, Person
 
 from .base_client import AsyncBaseClient
@@ -11,7 +11,6 @@ from .base_client import AsyncBaseClient
 class AsyncElasticsearchClient(AsyncBaseClient):
     """An async Elasticsearch client to retrieve data."""
 
-    @backoff(ConnectionError)
     async def get_by_id(self, uuid: UUID, mapper: Mapper) -> Genre | Movie | Person | None:
         """Get data by id from Elasticsearch."""
 
@@ -22,7 +21,6 @@ class AsyncElasticsearchClient(AsyncBaseClient):
 
         return mapper.model(**doc['_source'])
 
-    @backoff(ConnectionError)
     async def search(self, search_body: dict, mapper: Mapper) -> list[Genre | Movie | Person] | None:
         """Search data in Elasticsearch."""
 
