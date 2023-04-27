@@ -1,7 +1,7 @@
-from typing import Annotated
+from typing import Annotated, Literal
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Path, Query
 
 from models import MovieFull, Movies
 from services import MovieService, get_movie_service
@@ -32,10 +32,11 @@ class MovieAPIFull(MovieFull):
     response_description='Full film details',
 )
 async def get_movie(
-    movie_id: UUID, movie_service: MovieService = Depends(get_movie_service)
+    movie_id: Annotated[UUID, Path(title='movie id', description='parameter - movie id')],
+    movie_service: MovieService = Depends(get_movie_service),
 ) -> MovieAPIFull | HTTPException:
     movie = await movie_service.get_by_id(uuid=movie_id)
-    return MovieAPIFull(**movie.dict())
+    return MovieAPIFull(**movie.dict(by_alias=True))
 
 
 @router.get(
@@ -46,8 +47,11 @@ async def get_movie(
     response_description='Summary of movies',
 )
 async def movies_main_page(
-    sort: str | None = None,
-    genre: str | None = None,
+    sort: Annotated[
+        Literal['title', '-title', 'imdb_rating', '-imdb_rating'] | None,
+        Query(title='sort', description='optional parameter - sort'),
+    ] = None,
+    genre: Annotated[str | None, Query(title='genre', description='optional parameter - filter by genre')] = None,
     page: Annotated[int | None, Query(title='page number', description='optional parameter - page number', ge=1)] = 1,
     page_size: Annotated[int | None, Query(title='page size', description='optional parameter - page size', ge=1)] = 50,
     movie_service: MovieService = Depends(get_movie_service),
@@ -66,9 +70,12 @@ async def movies_main_page(
     response_description='Summary of movies',
 )
 async def search_movies(
-    query: str | None = None,
-    sort: str | None = None,
-    genre: str | None = None,
+    query: Annotated[str | None, Query(title='query', description='optional parameter - query')] = None,
+    sort: Annotated[
+        Literal['title', '-title', 'imdb_rating', '-imdb_rating'] | None,
+        Query(title='sort', description='optional parameter - sort'),
+    ] = None,
+    genre: Annotated[str | None, Query(title='genre', description='optional parameter - filter by genre')] = None,
     page: Annotated[int | None, Query(title='page number', description='optional parameter - page number', ge=1)] = 1,
     page_size: Annotated[int | None, Query(title='page size', description='optional parameter - page size', ge=1)] = 50,
     movie_service: MovieService = Depends(get_movie_service),

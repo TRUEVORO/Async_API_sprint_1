@@ -1,7 +1,7 @@
-from typing import Annotated
+from typing import Annotated, Literal
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Path, Query
 
 from models import Persons, _Person  # noqa
 from services import PersonService, get_person_service
@@ -32,10 +32,11 @@ class PersonsAPI(Persons):
     response_description='Full person details',
 )
 async def person_details(
-    person_id: UUID, person_service: PersonService = Depends(get_person_service)
+    person_id: Annotated[UUID, Path(title='person id', description='parameter - person id')],
+    person_service: PersonService = Depends(get_person_service),
 ) -> PersonAPI | HTTPException:
     person = await person_service.get_by_id(person_id)
-    return PersonAPI(uuid=person.uuid, full_name=person.full_name, films=person.films)
+    return PersonAPI(**person.dict(by_alias=True))
 
 
 @router.get(
@@ -46,7 +47,9 @@ async def person_details(
     response_description='Summary of persons',
 )
 async def persons_main(
-    sort: str | None = None,
+    sort: Annotated[
+        Literal['full_name', '-full_name'] | None, Query(title='sort', description='optional parameter - sort')
+    ] = None,
     page: Annotated[int | None, Query(title='page number', description='optional parameter - page number', ge=1)] = 1,
     page_size: Annotated[int | None, Query(title='page size', description='optional parameter - page size', ge=1)] = 50,
     person_service: PersonService = Depends(get_person_service),
@@ -63,8 +66,10 @@ async def persons_main(
     response_description='Short info of the person with similar ones',
 )
 async def persons_details(
-    query: str | None = None,
-    sort: str | None = None,
+    query: Annotated[str | None, Query(title='query', description='optional parameter - query')] = None,
+    sort: Annotated[
+        Literal['full_name', '-full_name'] | None, Query(title='sort', description='optional parameter - sort')
+    ] = None,
     page: Annotated[int | None, Query(title='page number', description='optional parameter - page number', ge=1)] = 1,
     page_size: Annotated[int | None, Query(title='page size', description='optional parameter - page size', ge=1)] = 50,
     person_service: PersonService = Depends(get_person_service),

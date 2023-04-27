@@ -46,6 +46,9 @@ class SearchBodyCreator:
         else:
             order = 'asc'
 
+        if key != 'imdb_rating':
+            key = f'{key}.raw'
+
         search_body['sort'][0] = {key: {'order': order}}
 
         return search_body
