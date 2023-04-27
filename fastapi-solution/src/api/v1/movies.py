@@ -35,7 +35,7 @@ async def get_movie(
     movie_id: UUID, movie_service: MovieService = Depends(get_movie_service)
 ) -> MovieAPIFull | HTTPException:
     movie = await movie_service.get_by_id(uuid=movie_id)
-    return MovieAPIFull(**movie.dict())
+    return MovieAPIFull(**movie.dict(by_alias=True))
 
 
 @router.get(

@@ -35,7 +35,7 @@ async def genre_details(
     genre_id: UUID, genre_service: GenreService = Depends(get_genre_service)
 ) -> GenreAPI | HTTPException:
     genre = await genre_service.get_by_id(genre_id)
-    return GenreAPI(uuid=genre.uuid, name=genre.name)
+    return GenreAPI(**genre.dict(by_alias=True))
 
 
 @router.get(

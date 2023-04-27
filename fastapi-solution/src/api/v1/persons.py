@@ -35,7 +35,7 @@ async def person_details(
     person_id: UUID, person_service: PersonService = Depends(get_person_service)
 ) -> PersonAPI | HTTPException:
     person = await person_service.get_by_id(person_id)
-    return PersonAPI(uuid=person.uuid, full_name=person.full_name, films=person.films)
+    return PersonAPI(**person.dict(by_alias=True))
 
 
 @router.get(
