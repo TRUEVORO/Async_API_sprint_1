@@ -1,7 +1,7 @@
-from typing import Annotated
+from typing import Annotated, Literal
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Path, Query
 
 from models import Genres, _Genre  # noqa
 from services import GenreService, get_genre_service
@@ -32,7 +32,8 @@ class GenresAPI(Genres):
     response_description='Full genre details',
 )
 async def genre_details(
-    genre_id: UUID, genre_service: GenreService = Depends(get_genre_service)
+    genre_id: Annotated[UUID, Path(title='genre id', description='parameter - genre id')],
+    genre_service: GenreService = Depends(get_genre_service),
 ) -> GenreAPI | HTTPException:
     genre = await genre_service.get_by_id(genre_id)
     return GenreAPI(**genre.dict(by_alias=True))
@@ -46,7 +47,9 @@ async def genre_details(
     response_description='Summary of genres',
 )
 async def genres_main(
-    sort: str | None = None,
+    sort: Annotated[
+        Literal['name', '-name'] | None, Query(title='sort', description='optional parameter - sort')
+    ] = None,
     page: Annotated[int | None, Query(title='page number', description='optional parameter - page number', ge=1)] = 1,
     page_size: Annotated[int | None, Query(title='page size', description='optional parameter - page size', ge=1)] = 50,
     genre_service: GenreService = Depends(get_genre_service),
@@ -63,8 +66,10 @@ async def genres_main(
     response_description='Summary of genres',
 )
 async def genres_details(
-    query: str | None = None,
-    sort: str | None = None,
+    query: Annotated[str | None, Query(title='query', description='optional parameter - query')] = None,
+    sort: Annotated[
+        Literal['name', '-name'] | None, Query(title='sort', description='optional parameter - sort')
+    ] = None,
     page: Annotated[int | None, Query(title='page number', description='optional parameter - page number', ge=1)] = 1,
     page_size: Annotated[int | None, Query(title='page size', description='optional parameter - page size', ge=1)] = 50,
     genre_service: GenreService = Depends(get_genre_service),
